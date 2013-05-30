@@ -13,7 +13,6 @@ import (
 var (
 	filehash, ext, local_serverid, remote_serverid, nodename string
 
-	// 公钥
 	publicKey = []byte(`
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZsfv1qscqYdy4vY+P4e3cAtmv
@@ -23,7 +22,6 @@ AUeJ6PeW+DAkmJWF6QIDAQAB
 -----END PUBLIC KEY-----
 `)
 
-	// 私钥
 	privateKey = []byte(`
 -----BEGIN RSA PRIVATE KEY-----
 MIICXQIBAAKBgQDZsfv1qscqYdy4vY+P4e3cAtmvppXQcRvrF1cB4drkv0haU24Y
@@ -88,19 +86,19 @@ func (self *RStorageHandler) Get() {
 	   get状态：
 	   根据请求的来路URL，分拆URL hash字符串，读出文件hash值
 	   以文件hash值为对象，找出应该去哪个节点读取文件
-	   如果找到节点，则读取，如果找不到节点，则在当前机器查找。
-	   发送文件
+	   判断是否为本节点，如果是则读取本机上的文件并返回给用户，
+	   如果不是则跳转到指定节点去处理。
 	*/
 
 	filename := self.GetString(":filename")
 	for i, v := range strings.Split(filename, "_") {
-		fmt.Println(i, v)
+
 		if i == 0 {
 			filehash = v
 		}
 		if i == 1 {
 			for ii, vv := range strings.Split(v, ".") {
-				fmt.Println(ii, vv)
+
 				if ii == 0 {
 					local_serverid = vv
 				}
@@ -144,15 +142,12 @@ func (self *RStorageHandler) Get() {
 func (self *WStorageHandler) Post() {
 	fmt.Println("写入模式")
 	/*
-		写入文件之前，我们先去服务端读取临时目录里的文件。
 		获取到文件后，我们用正态分布随机算法选择出存储节点，
 		然后判断该节点是不是本机，如果是则直接把文件保存到本节点上即可，
-		如果不是则转发SetFile命令到该节点。
-
-
+		如果不是当前节点，则跳到目标节点去保存。
 	*/
 	//随机写文件，如果遇到节点服务器无法写入（已满）则再次随机，
-	//直到随机次数大于节点数依然无法写入的时候则终止写入，并返回写入失败的状态
+	//直到随机次数大于节点数依然无法写入的时候则终止写入，并返回写入失败的状态（表示整个存储网络都不可用）
 
 	//URL HASH组成：
 	//http://localhost/setfile/FileHash_senderServerId.png
@@ -162,21 +157,21 @@ func (self *WStorageHandler) Post() {
 		接受文件
 		计算文件hash值
 		以ServerId+FileHash+文件后缀作为文件名，
-		以除余法算出一个随机数值R
-		以文件hash值为对象，计算一致性hash值算出应该保存文件到哪个节点
-		如果找到节点，则发送数据，如果找不到节点，则在当前机器存储。
+		以正态随机算法算出一个随机数值R，然后保存文件到节点R
+		如果为当前节点，则在当前机器存储文件，
 	*/
 
 	//setfile状态下的FileHash=passwordhash（filehash+passwordhash）
+
 	filename := self.GetString(":filename")
 	for i, v := range strings.Split(filename, "_") {
-		fmt.Println(i, v)
+
 		if i == 0 {
 			filehash = v
 		}
 		if i == 1 {
 			for ii, vv := range strings.Split(v, ".") {
-				fmt.Println(ii, vv)
+
 				if ii == 0 {
 					remote_serverid = vv
 				}
@@ -202,9 +197,8 @@ func (self *WStorageHandler) Post() {
 			fmt.Println("SetFile fileurl %s error!", fileurl)
 		} else {
 			//预设目录
-			if e := os.Mkdir(filedir, 0644); e != nil {
-				fmt.Println("os.Mkdir error:", e)
-			}
+			os.MkdirAll(filedir, 0644)
+
 			//打开 文件句柄f 以便保存 io.Copy 过来的 文件句柄file
 			if f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0644); err != nil {
 				fmt.Println("os.OpenFile error:", err)
@@ -216,10 +210,12 @@ func (self *WStorageHandler) Post() {
 					//保存文件
 					if e := utils.SaveFile(filedir, filename, f); e != nil {
 						fmt.Println("SaveFile error:", e)
+						self.Ctx.WriteString("error")
 					} else {
 						fmt.Println("SaveFile Okay!")
 						fileurl = "http://" + nodename + "/getfile/" + filehash + "_" + remote_serverid + "." + ext
-						self.Redirect(fileurl, 302)
+						//self.Redirect(fileurl, 302)
+						self.Ctx.WriteString(fileurl)
 					}
 				}
 			}
@@ -236,9 +232,8 @@ func (self *WStorageHandler) Post() {
 		if origData, err := utils.RsaDecrypt(data, privateKey); err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Println(string(origData))
+			fmt.Println("origData:", string(origData))
 		}
 	}
 
-	self.Ctx.WriteString(fileurl)
 }

@@ -149,7 +149,10 @@ func (self *UploaderHandler) Post() {
 				}
 				actionurl := "http://" + nodename + "/setfile/" + hash + "_" + serverid + ext
 				fmt.Println(actionurl)
+				fmt.Println("output_file:", output_file)
 				resp, err := utils.PostFile(output_file, actionurl, "file")
+				fmt.Println("resp.Body", resp.Body)
+
 				if err != nil {
 					fmt.Println(resp, err)
 					self.Data["MsgErr"] = "<div>文件" + path + "保存错误，filehash：" + string(hash) + "filesize:" + string(fsize) + "</div>"

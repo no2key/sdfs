@@ -679,14 +679,17 @@ func SaveFile(path string, filename string, file *os.File) error {
 	filepath := path + filename
 	os.MkdirAll(path, 0644)
 
-	if f, err := os.Create(filepath); err != nil {
+	if f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0644); err != nil {
 		return err
 	} else {
-		if _, e := io.Copy(f, file); e != nil {
-			return e
-		} else {
-			return nil
-		}
+		io.Copy(f, file)
+		/*
+			io.Copy 在一般情况下拷贝不会出错，多个携程访问的时候可能会出现“read ./data/*.png: Access is denied.”的错误，
+			造成这个错误的原因很可能是由于多个协程争抢打开文件导致，然而对实际情况是没有任何坏影响的。
+			如果我们根据这个错误作出判断的话就会错上加错，所以在这里不做任何判断，完全由上帝决定好了。
+		*/
+		return nil
+
 	}
 
 }

@@ -1,12 +1,13 @@
 package main
 
 import (
+	"./models"
 	"./storager"
 	"github.com/insionng/torgo"
 )
 
 func main() {
-
+	models.CreateDb()
 	torgo.SetStaticPath("/static", "./static")
 
 	torgo.Router(`/getfile/:filename`, &storager.RStorageHandler{})
