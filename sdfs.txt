@@ -1,0 +1,28 @@
+sdfs get
+sdfs set
+
+sdfs每台机器设置一个id hash
+hash（id+余数）
+
+同一个sdfs系统应该分状态来进行不同工作
+post状态的时候就是set操作，
+get状态的时候就是get操作。
+
+post状态：
+接受文件
+计算文件hash值
+以ServerId+FileHash+文件后缀作为文件名，
+以除余法算出一个随机数值R
+以文件hash值为对象，计算一致性hash值算出应该保存文件到哪个节点
+如果找到节点，则发送数据，如果找不到节点，则在当前机器存储。
+
+get状态：
+根据请求的来路URL，获得URL hash字符串
+分拆URL hash字符串，读出文件hash值
+以文件hash值为对象，计算一致性hash值算出应该去哪个节点读取文件
+如果找到节点，则读取，如果找不到节点，则在当前机器查找。
+发送文件
+
+URL HASH组成：
+http://localhost/getfile/FileHash_ServerId.png
+http://localhost/setfile/FileHash_ServerId.png
