@@ -56,14 +56,14 @@ func LocalNode() (int64, string) {
 
 	*/
 	// number id & node name (sub domain)
-	return 0, "localhost"
+	return 0, "file0.veryhour.com"
 }
 
 func RandNode(m int64) (int64, string) {
 	nodeskv := make([]string, 3, 10)
-	nodeskv[0] = "localhost"
-	nodeskv[1] = "file1.veryhour.com:8001"
-	nodeskv[2] = "file2.veryhour.com:8002"
+	nodeskv[0] = "file0.veryhour.com"
+	nodeskv[1] = "file1.veryhour.com:8801"
+	nodeskv[2] = "file2.veryhour.com:8802"
 	if m < 0 {
 		//根据正态分布随机整数选择节点服务器
 		n := int64(utils.Nrand(int64(len(nodeskv))))

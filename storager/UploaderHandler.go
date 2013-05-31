@@ -6,6 +6,7 @@ import (
 	"../utils"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -148,21 +149,23 @@ func (self *UploaderHandler) Post() {
 					fsize = fileInfo.Size() / 1024
 				}
 				actionurl := "http://" + nodename + "/setfile/" + hash + "_" + serverid + ext
-				fmt.Println(actionurl)
-				fmt.Println("output_file:", output_file)
-				resp, err := utils.PostFile(output_file, actionurl, "file")
-				fmt.Println("resp.Body", resp.Body)
 
-				if err != nil {
+				if resp, err := utils.PostFile(output_file, actionurl, "file"); err != nil {
 					fmt.Println(resp, err)
-					self.Data["MsgErr"] = "<div>文件" + path + "保存错误，filehash：" + string(hash) + "filesize:" + string(fsize) + "</div>"
+					fmt.Println("文件" + path + "保存错误，filehash：" + string(hash) + "filesize:" + string(fsize))
 				} else {
-					self.Data["MsgErr"] = "<img src=\"" + path + "\" alt=\"" + string(hash) + "\" />"
 
-					fmt.Println(self.Data["MsgErr"])
+					if body, err := ioutil.ReadAll(resp.Body); err != nil {
+						fmt.Println("resp.Body err", err)
+					} else {
+						fmt.Println("body", string(body))
+						self.Data["MsgErr"] = "<img src=\"" + string(body) + "\" alt=\"" + string(hash) + "\" />"
+
+						//models.SetFile(0, pid, 0, handler.Filename, "", string(hash), path, "", fsize)
+					}
+
 				}
 
-				//models.SetFile(0, pid, 0, handler.Filename, "", string(hash), path, "", fsize)
 			}
 
 		} else {

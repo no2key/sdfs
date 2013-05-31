@@ -9,9 +9,9 @@ Sdfs是一个 Golang轻量级分布式文件存储分发系统
 Sdfs is licensed under the BSD Licence
 
 
-## Install
+## Download
 ============
-    go get github.com/insionng/sdfs
+    git clone https://github.com/insionng/sdfs.git
 
 
 ## 设计思路
