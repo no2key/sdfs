@@ -1,8 +1,7 @@
-sdfs get
+﻿sdfs get
 sdfs set
 
-sdfs每台机器设置一个id hash
-hash（id+余数）
+sdfs每台机器设置一个id hash+nodename
 
 同一个sdfs系统应该分状态来进行不同工作
 post状态的时候就是set操作，

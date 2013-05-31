@@ -161,7 +161,7 @@ func (self *UploaderHandler) Post() {
 						fmt.Println("body", string(body))
 						self.Data["MsgErr"] = "<img src=\"" + string(body) + "\" alt=\"" + string(hash) + "\" />"
 
-						//models.SetFile(0, pid, 0, handler.Filename, "", string(hash), path, "", fsize)
+						//models.SetFile(0, pid, 0, handler.Filename, "", string(hash), string(body) , "", fsize)
 					}
 
 				}
@@ -173,5 +173,4 @@ func (self *UploaderHandler) Post() {
 		}
 	}
 
-	self.Ctx.WriteString(self.Data["MsgErr"].(string))
 }

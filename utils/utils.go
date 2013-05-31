@@ -647,16 +647,18 @@ func PostFile(filepath string, actionurl string, fieldname string) (*http.Respon
 		fmt.Printf("Error Stating file: %s", filepath)
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", actionurl, request_reader)
-	if err != nil {
+
+	if req, err := http.NewRequest("POST", actionurl, request_reader); err != nil {
 		return nil, err
+	} else {
+
+		// Set headers for multipart, and Content Length
+		req.Header.Add("Content-Type", "multipart/form-data; boundary="+boundary)
+		req.ContentLength = fi.Size() + int64(body_buf.Len()) + int64(close_buf.Len())
+
+		return http.DefaultClient.Do(req)
 	}
 
-	// Set headers for multipart, and Content Length
-	req.Header.Add("Content-Type", "multipart/form-data; boundary="+boundary)
-	req.ContentLength = fi.Size() + int64(body_buf.Len()) + int64(close_buf.Len())
-
-	return http.DefaultClient.Do(req)
 }
 
 func WriteFile(path string, filename string, content string) error {
