@@ -2,12 +2,12 @@ package main
 
 import (
 	"./client"
-	"./models"
+	//"./models"
 	"github.com/insionng/torgo"
 )
 
 func main() {
-	models.CreateDb()
+	//models.CreateDb()
 	torgo.SetStaticPath("/static", "./static")
 
 	torgo.Router("/", &client.UploaderHandler{})
