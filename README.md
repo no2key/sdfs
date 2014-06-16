@@ -1,8 +1,7 @@
 ## Sdfs
 =======
 
-This project is close.
-
+This project has been closed.
 
 
 Sdfs是一个 Golang轻量级分布式文件存储分发系统
