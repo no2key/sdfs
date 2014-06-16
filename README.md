@@ -1,6 +1,10 @@
 ## Sdfs
 =======
 
+This project is close.
+
+
+
 Sdfs是一个 Golang轻量级分布式文件存储分发系统
 
 Sdfs最初是为了解决单站点的图片分布存储的容量问题而提出的设计需求，
